@@ -36,7 +36,8 @@ PSInput main(VSInput i)
 	o.pos = float4(i.pos, 1.0f);
 
 	// TODO : 0.07 Calculate texture coordinates by multiplying local position by texture matrix
-
+    o.tex = mul(texMatrix, o.pos);
+	
 	o.pos = mul(worldMatrix, o.pos);
 	o.pos = mul(viewMatrix, o.pos);
 	o.pos = mul(projMatrix, o.pos);

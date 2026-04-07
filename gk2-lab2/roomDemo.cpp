@@ -281,17 +281,20 @@ void RoomDemo::DrawWalls()
 	SetSurfaceColor(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 
 	// TODO : 0.02 calculate texture tranformation matrix for walls/ceiling/floor that transforms rectangle [-2,-2]x[2,2] into [0,0]x[1,1]
-	//XMStoreFloat4x4(&texMtx, XMMatrixIdentity());
-	XMStoreFloat4x4(&texMtx, XMMatrixIdentity());
+	XMMATRIX textureUVTransformationMatrix = XMMatrixScaling(0.25f, 0.25f, 0.25f) * XMMatrixTranslation(0.5f, 0.5f, 0.0f);
+	XMStoreFloat4x4(&texMtx, textureUVTransformationMatrix);
 	UpdateBuffer(m_cbTex1Mtx, texMtx);
 
 
 	// TODO : 0.03 set shaders to m_textureVS, m_texturePS
 	// TODO : 0.11 draw ceiling with colorTexture pixel shaders instead
-	SetShaders(m_phongVS, m_phongPS);
+	SetShaders(m_textureVS, m_texturePS);
 
 	// TODO : 0.04 set ceiling the texture to perlin noise
-
+	auto srvt = (m_perlinTexture.get());
+	m_device.context()->PSSetShaderResources(0, 1, &srvt);
+	auto s_ptr = m_samplerWrap.get();
+	m_device.context()->PSSetSamplers(0, 1, &s_ptr);
 
 	DrawMesh(m_wall, m_wallsMtx[5]);
 
@@ -302,6 +305,8 @@ void RoomDemo::DrawWalls()
 	// TODO : 1.07 Pass the new sampler state along with wall and poster textures
 
 	// TODO : 0.05 set the walls' texture to brick wall 
+	srvt = (m_wallTexture.get());
+	m_device.context()->PSSetShaderResources(0, 1, &srvt);
 
 	// TODO : 0.12 draw back walls with regular texture shaders
 
@@ -314,8 +319,13 @@ void RoomDemo::DrawWalls()
 
 	//draw floor
 	// TODO : 0.09 Change texture matrix to stretch floor texture 8 times along y, i.e. transform rectangle [-2,-2]x[2,2] into [0,0]x[1,16]. Run the program again to see the difference.
+	textureUVTransformationMatrix = textureUVTransformationMatrix * XMMatrixScaling(1.0f, 16.0f, 1.0f);
+	XMStoreFloat4x4(&texMtx, textureUVTransformationMatrix);
+	UpdateBuffer(m_cbTex1Mtx, texMtx);
 
 	// TODO : 0.06 set floor texture to wood
+	srvt = (m_woodTexture.get());
+	m_device.context()->PSSetShaderResources(0, 1, &srvt);
 
 	DrawMesh(m_wall, m_wallsMtx[4]);
 }
