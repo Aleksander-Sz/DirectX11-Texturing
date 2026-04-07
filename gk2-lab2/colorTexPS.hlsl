@@ -15,5 +15,5 @@ struct PSInput
 float4 main(PSInput i) : SV_TARGET
 {
 	// TODO : 0.10 Like in texturedPS.hlsl, sample color from the map, but add it to surfaceColor;
-	return surfaceColor;
+    return surfaceColor + colorMap.Sample(colorSampler, i.tex);
 }

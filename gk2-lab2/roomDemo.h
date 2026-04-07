@@ -56,8 +56,8 @@ namespace mini::gk2
 			m_chairMtx, m_tableLegsMtx[4], m_tableTopMtx, m_tableSideMtx, m_monitorMtx;
 
 		dx_ptr<ID3D11SamplerState> m_samplerWrap;
-
 		// TODO : 1.05 Add second sampler state field
+		dx_ptr<ID3D11SamplerState> m_samplerBorder;
 
 		dx_ptr<ID3D11ShaderResourceView> m_wallTexture;
 		dx_ptr<ID3D11ShaderResourceView> m_posterTexture;

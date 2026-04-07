@@ -42,6 +42,8 @@ PSInput main(VSInput i)
 	o.pos = float4(i.pos, 1.0f);
 
 	// TODO : Calculate coordinates for each of two textures
+    o.tex1 = mul(texMatrix1, o.pos);
+    o.tex2 = mul(texMatrix2, o.pos);
 
 	o.pos = mul(worldMatrix, o.pos);
 	o.pos = mul(viewMatrix, o.pos);

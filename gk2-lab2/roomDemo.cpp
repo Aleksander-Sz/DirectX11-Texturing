@@ -49,7 +49,14 @@ RoomDemo::RoomDemo(HINSTANCE appInstance)
 	m_samplerWrap = m_device.CreateSamplerState(sd);
 	
 	// TODO : 1.06 Initialize second sampler state
-
+	sd.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sd.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sd.BorderColor[0] = 0.0f;
+	sd.BorderColor[1] = 0.0f;
+	sd.BorderColor[2] = 0.0f;
+	sd.BorderColor[3] = 0.0f;
+	//sd.MipLODBias = 2.0f;
+	m_samplerBorder = m_device.CreateSamplerState(sd);
 	// TODO : 1.10 Moddify MipLODBias field for the second sampler
 
 
@@ -136,7 +143,7 @@ RoomDemo::RoomDemo(HINSTANCE appInstance)
 	XMFLOAT4X4 tempMtx;
 
 	// TODO : 1.08 Calculate correct transformation matrix for the poster texture
-	XMStoreFloat4x4(&tempMtx, XMMatrixIdentity());
+	XMStoreFloat4x4(&tempMtx, XMMatrixScaling(-0.25f * 4.0f, 0.25f * 3.0f, 0.0f) * XMMatrixRotationZ(XMConvertToRadians(190.0f)) * XMMatrixTranslation(1.6f, 0.5f, 0.0f));
 	
 	UpdateBuffer(m_cbTex2Mtx, tempMtx);
 
@@ -288,13 +295,10 @@ void RoomDemo::DrawWalls()
 
 	// TODO : 0.03 set shaders to m_textureVS, m_texturePS
 	// TODO : 0.11 draw ceiling with colorTexture pixel shaders instead
-	SetShaders(m_textureVS, m_texturePS);
+	SetShaders(m_textureVS, m_colorTexPS);
 
 	// TODO : 0.04 set ceiling the texture to perlin noise
-	auto srvt = (m_perlinTexture.get());
-	m_device.context()->PSSetShaderResources(0, 1, &srvt);
-	auto s_ptr = m_samplerWrap.get();
-	m_device.context()->PSSetSamplers(0, 1, &s_ptr);
+	SetTextures({ m_perlinTexture.get() }, m_samplerWrap);
 
 	DrawMesh(m_wall, m_wallsMtx[5]);
 
@@ -302,15 +306,20 @@ void RoomDemo::DrawWalls()
 	SetSurfaceColor(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	// TODO : 1.04 Draw back wall with muliti-texture shaders, setting textures to wall and poster.
+	SetShaders(m_multiTexVS, m_multiTexPS);
+
 	// TODO : 1.07 Pass the new sampler state along with wall and poster textures
+	SetTextures({ m_wallTexture.get(), m_posterTexture.get()}, m_samplerBorder);
+
+	DrawMesh(m_wall, m_wallsMtx[0]);
 
 	// TODO : 0.05 set the walls' texture to brick wall 
-	srvt = (m_wallTexture.get());
-	m_device.context()->PSSetShaderResources(0, 1, &srvt);
+	//srvt = (m_wallTexture.get());
+	//m_device.context()->PSSetShaderResources(0, 1, &srvt);
 
 	// TODO : 0.12 draw back walls with regular texture shaders
 
-	DrawMesh(m_wall, m_wallsMtx[0]);
+	SetShaders(m_textureVS, m_texturePS);
 
 	//draw remainting walls
 	// TODO : 0.13 draw remaining walls with regular texture shaders
@@ -324,8 +333,7 @@ void RoomDemo::DrawWalls()
 	UpdateBuffer(m_cbTex1Mtx, texMtx);
 
 	// TODO : 0.06 set floor texture to wood
-	srvt = (m_woodTexture.get());
-	m_device.context()->PSSetShaderResources(0, 1, &srvt);
+	SetTextures({ m_woodTexture.get() }, m_samplerWrap);
 
 	DrawMesh(m_wall, m_wallsMtx[4]);
 }
