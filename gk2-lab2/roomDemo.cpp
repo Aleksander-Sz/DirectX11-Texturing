@@ -341,7 +341,8 @@ void RoomDemo::DrawWalls()
 void RoomDemo::DrawTeapot()
 {
 	// TODO : 1.25 Comment the following line and begin m_envMapper shaders instead
-	SetShaders(m_phongVS, m_phongPS);
+	//SetShaders(m_phongVS, m_phongPS);
+	m_envMapper.Begin(m_device.context());
 
 	SetSurfaceColor(XMFLOAT4(0.8f, 0.7f, 0.65f, 1.0f));
 
@@ -466,11 +467,20 @@ void RoomDemo::DrawScene()
 void RoomDemo::Render()
 {
 	Base::Render();
-	// TODO : 1.20 Change projection matrix to for drawing in environment cube
+    // TODO : 1.20 Change projection matrix to for drawing in environment cube
+	UpdateBuffer(m_cbProjMtx, m_envMapper.FaceProjMtx());
 
 	// TODO : 1.21 Set evnMapper render target
+	m_envMapper.SetTarget(m_device.context());
 
 	// TODO : 1.22 For each cube face: clear envMapper render target, update camera constant buffer, draw the scene and copy the result to cubemap
+	for (int i = 0; i < 6; i++)
+	{
+		m_envMapper.ClearTarget(m_device.context());
+		UpdateBuffer(m_cbViewMtx, m_envMapper.FaceViewMtx(D3D11_TEXTURECUBE_FACE(i)));
+		DrawScene();
+		m_envMapper.SaveFace(m_device.context(), D3D11_TEXTURECUBE_FACE(i));
+	}
 
 	ResetRenderTarget();
 	UpdateBuffer(m_cbProjMtx, m_projMtx);
