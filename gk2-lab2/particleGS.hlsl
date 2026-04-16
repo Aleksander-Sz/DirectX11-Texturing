@@ -31,6 +31,25 @@ void main(point GSInput inArray[1], inout TriangleStream<PSInput> ostream)
 	PSInput o = (PSInput)0;
 
 	// TODO : 1.30 Initialize 4 vertices to make a bilboard and append them to the ostream
-
+    float component1 = dx;//cos(i.angle) - sin(i.angle);
+    float component2 = dy;//cos(i.angle) + sin(i.angle);
+	
+    o.pos = mul(projMatrix, i.pos + float4(-component2, component1, 0.0f, 0.0f));
+    o.tex1 = float2(0.0f, 0.0f);
+    o.tex2 = float2(i.age / TimeToLive, 0.0f);
+    ostream.Append(o);
+    o.pos = mul(projMatrix, i.pos + float4(component1, component2, 0.0f, 0.0f));
+    o.tex1 = float2(1.0f, 0.0f);
+    o.tex2 = float2(i.age / TimeToLive, 0.0f);
+    ostream.Append(o);
+    o.pos = mul(projMatrix, i.pos + float4(-component1, -component2, 0.0f, 0.0f));
+    o.tex1 = float2(0.0f, 1.0f);
+    o.tex2 = float2(i.age / TimeToLive, 1.0f);
+    ostream.Append(o);
+    o.pos = mul(projMatrix, i.pos + float4(component2, -component1, 0.0f, 0.0f));
+    o.tex1 = float2(1.0f, 1.0f);
+    o.tex2 = float2(i.age / TimeToLive, 1.0f);
+    ostream.Append(o);
+	
 	ostream.RestartStrip();
 }

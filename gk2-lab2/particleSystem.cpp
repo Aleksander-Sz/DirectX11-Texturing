@@ -74,8 +74,20 @@ XMFLOAT3 ParticleSystem::RandomVelocity()
 Particle ParticleSystem::RandomParticle()
 {
 	static uniform_real_distribution anglularVelDist{ MIN_ANGLE_VEL, MAX_ANGLE_VEL };
+	static uniform_real_distribution angle2{ 0.0f, MAX_ANGLE };
 	Particle p;
 	// TODO : 1.27 Setup initial particle properties
+	ParticleVertex v;
+	v.Pos = m_emitterPos;
+	v.Age = 0.0f;
+	v.Angle = angle2(m_random);
+	v.Size = PARTICLE_SIZE;
+	p.Vertex = v;
+	ParticleVelocities vel;
+	vel.AngularVelocity = anglularVelDist(m_random);
+	vel.Velocity = RandomVelocity();
+	vel.AngularVelocity = anglularVelDist(m_random);
+	p.Velocities = vel;
 
 	return p;
 }
@@ -83,6 +95,12 @@ Particle ParticleSystem::RandomParticle()
 void ParticleSystem::UpdateParticle(Particle& p, float dt)
 {
 	// TODO : 1.28 Update particle properties
+	p.Vertex.Age += dt;
+	p.Vertex.Pos.x += p.Velocities.Velocity.x * dt;
+	p.Vertex.Pos.y += p.Velocities.Velocity.y * dt;
+	p.Vertex.Pos.z += p.Velocities.Velocity.z * dt;
+	p.Vertex.Angle += p.Velocities.AngularVelocity * dt;
+	p.Vertex.Size += PARTICLE_SCALE * PARTICLE_SIZE * dt;
 }
 
 vector<ParticleVertex> ParticleSystem::GetParticleVerts(DirectX::XMFLOAT4 cameraPosition)
@@ -91,6 +109,26 @@ vector<ParticleVertex> ParticleSystem::GetParticleVerts(DirectX::XMFLOAT4 camera
 
 	vector<ParticleVertex> vertices;
 	// TODO : 1.29 Copy particles' vertex data to a vector and sort them
-
+	vector<float> distancesToCamera;
+	for (int i = 0; i < m_particles.size(); i++)
+	{
+		vertices.push_back(m_particles[i].Vertex);
+		distancesToCamera.push_back(XMVectorGetX(XMVector3Length(XMVectorSubtract(XMLoadFloat4(&cameraPosition), XMLoadFloat3(&vertices[i].Pos)))));
+	}
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		for (size_t j = i; j < vertices.size(); j++)
+		{
+			if(distancesToCamera[i] < distancesToCamera[j])
+			{
+				ParticleVertex temp = vertices[i];
+				vertices[i] = vertices[j];
+				vertices[j] = temp;
+				float tempDist = distancesToCamera[i];
+				distancesToCamera[i] = distancesToCamera[j];
+				distancesToCamera[j] = tempDist;
+			}
+		}
+	}
 	return vertices;
 }
