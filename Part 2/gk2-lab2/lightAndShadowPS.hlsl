@@ -59,6 +59,12 @@ float4 main(PSInput i) : SV_TARGET
     }
 
 	// TODO : 1.18 Include shadow map in light color calculation
+    float shadowMapValue = shadowMap.Sample(colorSampler, lightTexCoords.xy).r;
+    //return float4(shadowMapValue, 0.0f, 1.0f, 1.0f);
+	if(shadowMapValue < lightTexCoords.z)
+    {
+        lightColor = defLightColor;
+    }
 
     color += lightColor.rgb * surfaceColor.xyz * kd * saturate(dot(normal, lightVec)); //diffuse color
 	float nh = dot(normal, halfVec);
